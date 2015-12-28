@@ -1,0 +1,711 @@
+<!doctype html>
+<html class="theme-next   use-motion ">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+
+
+
+
+<meta name="description" content="本文主要介绍如何使用BurpSuite抓取Android/iOS应用使用http/https、WebSocket协议进行通信的数据包。
+主要内容
+工具
+环境搭建
+原理分析
+抓包测试
+进一步学习burp
+与fiddler和Wireshark比较
+
+
+工具
+安卓手机一部（红米）
+苹果手机一部（5s）
+笔记本电脑一台（本人使用windows 7）
+BurpSuite软件，链接：http://pan.ba">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Android/iOS]抓包分析BurpSuite版">
+<meta property="og:url" content="http://re4g.com/2015/12/28/Android-iOS-抓包分析BurpSuite版/index.html">
+<meta property="og:site_name" content="freshlhy's blog">
+<meta property="og:description" content="本文主要介绍如何使用BurpSuite抓取Android/iOS应用使用http/https、WebSocket协议进行通信的数据包。
+主要内容
+工具
+环境搭建
+原理分析
+抓包测试
+进一步学习burp
+与fiddler和Wireshark比较
+
+
+工具
+安卓手机一部（红米）
+苹果手机一部（5s）
+笔记本电脑一台（本人使用windows 7）
+BurpSuite软件，链接：http://pan.ba">
+<meta property="og:image" content="http://i4.tietuku.com/122b6744bab97c8d.png">
+<meta property="og:image" content="http://i4.tietuku.com/5c51a2cbf95ad8d8.png">
+<meta property="og:image" content="http://i4.tietuku.com/bee5ba3cac1f7c70.png">
+<meta property="og:image" content="http://i4.tietuku.com/8cbc8bda0a6b2bd6.png">
+<meta property="og:image" content="http://i4.tietuku.com/26bdb37ad5ba5d52.png">
+<meta property="og:image" content="http://i4.tietuku.com/5979e8695df8903a.png">
+<meta property="og:image" content="http://i4.tietuku.com/3980229aa25f4fa9.png">
+<meta property="og:image" content="http://i4.tietuku.com/fd5015d46238b06b.png">
+<meta property="og:image" content="http://i4.tietuku.com/a71c2a7e7d8c1454.png">
+<meta property="og:image" content="http://i4.tietuku.com/82d548dc02d37f4a.png">
+<meta property="og:updated_time" content="2015-12-28T01:31:11.806Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Android/iOS]抓包分析BurpSuite版">
+<meta name="twitter:description" content="本文主要介绍如何使用BurpSuite抓取Android/iOS应用使用http/https、WebSocket协议进行通信的数据包。
+主要内容
+工具
+环境搭建
+原理分析
+抓包测试
+进一步学习burp
+与fiddler和Wireshark比较
+
+
+工具
+安卓手机一部（红米）
+苹果手机一部（5s）
+笔记本电脑一台（本人使用windows 7）
+BurpSuite软件，链接：http://pan.ba">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: '',
+    sidebar: 'post',
+    motion: true
+  };
+</script>
+
+  <title> [Android/iOS]抓包分析BurpSuite版 | freshlhy's blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">freshlhy's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                [Android/iOS]抓包分析BurpSuite版
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            發表於
+            <time itemprop="dateCreated" datetime="2015-12-28T09:15:00+08:00" content="2015-12-28">
+              2015-12-28
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><p>本文主要介绍如何使用BurpSuite抓取Android/iOS应用使用http/https、WebSocket协议进行通信的数据包。</p>
+<h4 id="u4E3B_u8981_u5185_u5BB9"><a href="#u4E3B_u8981_u5185_u5BB9" class="headerlink" title="主要内容"></a>主要内容</h4><ul>
+<li><a href="/#tools">工具</a></li>
+<li><a href="/#environment">环境搭建</a></li>
+<li><a href="/#principe">原理分析</a></li>
+<li><a href="/#test">抓包测试</a></li>
+<li><a href="/#next">进一步学习burp</a></li>
+<li><a href="/#compare">与fiddler和Wireshark比较</a></li>
+</ul>
+<p><a name="tools"></a></p>
+<h4 id="u5DE5_u5177"><a href="#u5DE5_u5177" class="headerlink" title="工具"></a>工具</h4><ul>
+<li>安卓手机一部（红米）</li>
+<li>苹果手机一部（5s）</li>
+<li>笔记本电脑一台（本人使用windows 7）</li>
+<li>BurpSuite软件，链接：<a href="http://pan.baidu.com/s/1mgvVNmC" target="_blank" rel="external">http://pan.baidu.com/s/1mgvVNmC</a>  密码：77qh （解压后双击BurpLoader.jar启动，如果提示输入license key，说明你下载的版本注册已过期，请找最新的版本，坑了我好久…）</li>
+<li>Firefox（chrome导出的证书安卓不能安装，可能是我的安卓系统版本低了）</li>
+</ul>
+<p><a name="environment"></a></p>
+<h4 id="u73AF_u5883_u642D_u5EFA"><a href="#u73AF_u5883_u642D_u5EFA" class="headerlink" title="环境搭建"></a>环境搭建</h4><ol>
+<li>将安卓、苹果手机和笔记本连入同一个wifi上网。</li>
+</ol>
+<ol>
+<li>在电脑上打开BurpSuite添加以本机ip（此处为192.168.199.120）为地址监听端口为8989（端口随意，尚未被占用即可）的代理，默认已监听8080端口。<br><img src="http://i4.tietuku.com/122b6744bab97c8d.png" alt="BurpSuite代理设置"></li>
+</ol>
+<ol>
+<li>在电脑上打开Firefox并设置代理为127.0.0.1：8080<br><img src="http://i4.tietuku.com/5c51a2cbf95ad8d8.png" alt="设置Firefox代理"></li>
+</ol>
+<ol>
+<li><p>在Firefox里访问 baidu.com，提示此链接不受信任，点击添加例外，按下图所示导出证书。网上有教程是导出der格式的证书，经测试crt格式的证书同时支持iOS和Android手机，而der格式证书只支持iOS手机。<br><img src="http://i4.tietuku.com/bee5ba3cac1f7c70.png" alt="选择根证书"><br>选中根证书后点击导出…<br><img src="http://i4.tietuku.com/8cbc8bda0a6b2bd6.png" alt="保存根证书"></p>
+</li>
+<li><p>打开cmd切到上步证书的保存路径输入命令，启动php内置的web服务器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -S 192.168.199.120:888</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>   <img src="http://i4.tietuku.com/26bdb37ad5ba5d52.png" alt="启动php内置的web服务器"></p>
+<ol>
+<li><p>下载证书到手机上并安装</p>
+<p>iOS直接在Safari输入地址下载并安装即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.199.120:888/PortSwiggerCA.crt</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>   Android在浏览器里下载后按下图所示进行安装</p>
+<p>   <img src="http://i4.tietuku.com/5979e8695df8903a.png" alt="BurpSuite代理设置"></p>
+<ol>
+<li>设置手机wifi连接代理为192.168.199.120:8989，以iOS为例，Android类似。<br><img src="http://i4.tietuku.com/3980229aa25f4fa9.png" alt="设置"></li>
+</ol>
+<p><a name="principe"></a></p>
+<h4 id="u539F_u7406_u5206_u6790"><a href="#u539F_u7406_u5206_u6790" class="headerlink" title="原理分析"></a>原理分析</h4><p>当你通过BurpSuite代理连接使用https协议的站点时，即与站点交互的数据会使用SSL进行加密。Burpsuite会为每个站点生成一个SSL证书，并使用自己的证书授权中心（Certificate Authority (CA)）签发，这样对手机端而言，信任了Burpsuite的证书授权中心，就会信任它签发的证书。如下图所示，上半部分为直接访问https协议站点，下部分为使用BurpSuite代理访问https协议站点示图，这样Burpsuite就可以截获经过解密的数据了。</p>
+<p> <img src="http://i4.tietuku.com/fd5015d46238b06b.png" alt="加密包解密原理"></p>
+<p> 当使用http或WebSocket进行通讯时，通过Burpsuite代理连接就可以直接截获未经加密的数据。</p>
+<p> <a name="test"></a></p>
+<h4 id="u6293_u5305_u6D4B_u8BD5"><a href="#u6293_u5305_u6D4B_u8BD5" class="headerlink" title="抓包测试"></a>抓包测试</h4><p>BurpSuite抓包有两种形式，一种是交互式的，类似于程序调试，一个包一个包走，你可以进行中断、丢弃、修改、重放等操作。另一种是记录式的，记录下所有交互包，也可以进行修改和重放等操作。另外交互模式下也会记录所有交互包。如下图所示，在Proxy标签下，通过intercept is on/off按键在交互式和记录式之间切换。</p>
+<p> <img src="http://i4.tietuku.com/a71c2a7e7d8c1454.png" alt="抓包形式切换"></p>
+<p>下图为iOS端浏览淘宝app时抓到的https包（Response里正常显示中文需要在Options标签下面修改为中文字体）。Android端抓包过程类似。</p>
+<p> <img src="http://i4.tietuku.com/82d548dc02d37f4a.png" alt="抓包示例"></p>
+<p><a name="next"></a></p>
+<h4 id="u8FDB_u4E00_u6B65_u5B66_u4E60burp"><a href="#u8FDB_u4E00_u6B65_u5B66_u4E60burp" class="headerlink" title="进一步学习burp"></a>进一步学习burp</h4><ul>
+<li><a href="http://drops.wooyun.org/author/%E5%B0%8F%E4%B9%90%E5%A4%A9" target="_blank" rel="external">Burp Suite使用介绍</a> 乌云drops有很多信息安全相关教程，有兴趣的朋友可以多看看。</li>
+<li><a href="http://www.waitalone.cn/burpsuite-series-uses-video-tutorials.html" target="_blank" rel="external">BurpSuite系列使用视频教程</a></li>
+</ul>
+<p><a name="compare"></a></p>
+<h4 id="u4E0Efiddler_u548CWireshark_u6BD4_u8F83"><a href="#u4E0Efiddler_u548CWireshark_u6BD4_u8F83" class="headerlink" title="与fiddler和Wireshark比较"></a>与fiddler和Wireshark比较</h4><p>三者中只有BurpSuite可以对抓包过程进行交互式操作，其记录模式与fiddler类似，Wireshark支持的协议最多，也更底层，功能强大，但不易上手，深入的话需要花费更多的精力。有兴趣的朋友可以看看下面的教程。</p>
+<ul>
+<li><a href="http://www.codeproject.com/Articles/718660/Debug-Inspect-WebSocket-traffic-with-Fiddler" target="_blank" rel="external">Debug / Inspect WebSocket traffic with Fiddler</a> 关于websocket抓包的，BurpSuite的websocket抓包功能比较简洁</li>
+<li><a href="http://drops.wooyun.org/author/%E8%81%9A%E9%94%8B%E5%AE%9E%E9%AA%8C%E5%AE%A4" target="_blank" rel="external">Wireshark黑客发现之旅</a></li>
+</ul>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+        </div>
+
+        
+
+
+        
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="/images/default_avatar.jpg" alt="freshlhy" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">freshlhy</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description"></p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">1</span>
+              <span class="site-state-item-name">文章</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">分類</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">標籤</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#u4E3B_u8981_u5185_u5BB9"><span class="nav-number">1.</span> <span class="nav-text">主要内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u5DE5_u5177"><span class="nav-number">2.</span> <span class="nav-text">工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u73AF_u5883_u642D_u5EFA"><span class="nav-number">3.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u539F_u7406_u5206_u6790"><span class="nav-number">4.</span> <span class="nav-text">原理分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u6293_u5305_u6D4B_u8BD5"><span class="nav-number">5.</span> <span class="nav-text">抓包测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u8FDB_u4E00_u6B65_u5B66_u4E60burp"><span class="nav-number">6.</span> <span class="nav-text">进一步学习burp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u4E0Efiddler_u548CWireshark_u6BD4_u8F83"><span class="nav-number">7.</span> <span class="nav-text">与fiddler和Wireshark比较</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2015</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freshlhy</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 強力驅動
+</div>
+
+<div class="theme-info">
+  主題 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+    
+    
+
+  
+
+
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
+
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+  
+  
+
+  
+  
+
+</body>
+</html>
